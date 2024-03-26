@@ -16,5 +16,34 @@ CHIP Mux4Way16 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    //a is {sel[0] and sel[0] == 0}
+    //b is {sel[0] == 1 and sel[1] == 0}
+    //c is {sel[0] == 0 and sel[1] == 1}
+    //d is {sel[0] and sel[1] == 1}
+
+    //a side. isa0 means is a[0] == 1
+    Not(in=sel[0], out=isa0);
+    Not(in=sel[1], out=isa1);
+    And(a=isa0, b=isa1, out=isa);
+
+    //b side
+    Not(in=sel[1], out=isb1);
+    And(a=sel[0], b=isb1, out=isb);
+
+    //c side
+    Not(in=sel[0], out=isc0);
+    And(a=isc0, b=sel[1], out=isc);
+
+    //d side
+    And(a=sel[0], b=sel[1], out=isd);
+
+    Mux16(a[0..15]=false, b[0..15]=a[0..15], sel=isa, out[0..15]=outa);
+    Mux16(a[0..15]=false, b[0..15]=b[0..15], sel=isb, out[0..15]=outb);
+    Mux16(a[0..15]=false, b[0..15]=c[0..15], sel=isc, out[0..15]=outc);
+    Mux16(a[0..15]=false, b[0..15]=d[0..15], sel=isd, out[0..15]=outd);
+
+    Or16(a[0..15]=outa, b[0..15]=outb, out[0..15] = aorbout);
+    Or16(a[0..15]=outc, b[0..15]=outd, out[0..15] = cordout);
+
+    Or16(a[0..15]=aorbout, b[0..15]=cordout, out[0..15]=out[0..15]);
 }

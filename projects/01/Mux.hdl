@@ -14,5 +14,10 @@ CHIP Mux {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    // someinput = sel, when it knows the input is 0 then it choose the left side.
+    // let's output result from a and b, first determine which one is been choosed.
+    Not(in=sel, out=sela);
+    And(a=a, b=sela, out=outa);
+    And(a=b, b=sel, out=outb);
+    Xor(a=outa, b=outb, out=out);
 }

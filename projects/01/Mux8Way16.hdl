@@ -18,5 +18,65 @@ CHIP Mux8Way16 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+
+    // a part
+    Not(in=sel[0], out=sela0);
+    Not(in=sel[1], out=sela1);
+    Not(in=sel[2], out=sela2);
+    And(a=sela0, b=sela1, out=fa1);
+    And(a=fa1, b=sela2, out=fa);
+
+    // b part
+    Not(in=sel[1], out=selb1);
+    Not(in=sel[2], out=selb2);
+    And(a=sel[0], b=selb1, out=fb1);
+    And(a=fb1, b=selb2, out=fb);
+
+    // c part
+    Not(in=sel[0], out=selc0);
+    Not(in=sel[2], out=selc2);
+    And(a=selc0, b=sel[1], out=fc1);
+    And(a=fc1, b=selc2, out=fc);
+
+    // d part
+    Not(in=sel[2], out=seld2);
+    And(a=sel[0], b=sel[1], out=fd1);
+    And(a=fd1, b=seld2, out=fd);
+
+    // e part 100
+    Not(in=sel[0], out=sele0);
+    Not(in=sel[1], out=sele1);
+    And(a=sele0, b=sele1, out=fe1);
+    And(a=fe1, b=sel[2], out=fe);
+
+    // f part 101
+    Not(in=sel[1], out=self1);
+    And(a=sel[0], b=self1, out=ff1);
+    And(a=ff1, b=sel[2], out=ff);
+
+    // g part 110
+    Not(in=sel[0], out=selg0);
+    And(a=selg0, b=sel[1], out=fg1);
+    And(a=fg1, b=sel[2], out=fg);
+
+    // h part 111
+    And(a=sel[0], b=sel[1], out=fh1);
+    And(a=fh1, b=sel[2], out=fh);
+
+    Mux16(a[0..15]=false, b[0..15]=a[0..15], sel=fa, out[0..15]=geta);
+    Mux16(a[0..15]=false, b[0..15]=b[0..15], sel=fb, out[0..15]=getb);
+    Mux16(a[0..15]=false, b[0..15]=c[0..15], sel=fc, out[0..15]=getc);
+    Mux16(a[0..15]=false, b[0..15]=d[0..15], sel=fd, out[0..15]=getd);
+    Mux16(a[0..15]=false, b[0..15]=e[0..15], sel=fe, out[0..15]=gete);
+    Mux16(a[0..15]=false, b[0..15]=f[0..15], sel=ff, out[0..15]=getf);
+    Mux16(a[0..15]=false, b[0..15]=g[0..15], sel=fg, out[0..15]=getg);
+    Mux16(a[0..15]=false, b[0..15]=h[0..15], sel=fh, out[0..15]=geth);
+
+    Or16(a[0..15]=geta, b[0..15]=getb, out=result1);
+    Or16(a[0..15]=getc, b[0..15]=getd, out=result2);
+    Or16(a[0..15]=gete, b[0..15]=getf, out=result3);
+    Or16(a[0..15]=getg, b[0..15]=geth, out=result4);
+    Or16(a[0..15]=result1, b[0..15]=result2, out=o1);
+    Or16(a[0..15]=result3, b[0..15]=result4, out=o2);
+    Or16(a[0..15]=o1, b[0..15]=o2, out=out);
 }
