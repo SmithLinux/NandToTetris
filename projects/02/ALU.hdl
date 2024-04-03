@@ -42,5 +42,37 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    // first step will likely be creating a logic design for zeroing and negating a 16-bit value
+    Add16(a[0..15]=true, b[0]=zx, out=zxto16);
+    Add16(a[0..15]=true, b[0]=zy, out=zyto16);
+
+    // zero the x input zx
+    And16(a=zxto16, b=x, out=zerox);
+
+    // zero the y input zy
+    And16(a=zyto16, b=y, out=zeroy);
+
+    // negate all the x input, if nx == 1 then Nand the nx with the x input.
+    Not16(in=zerox, out=notx);
+    Mux16(a=zerox, b=notx, sel=nx, out=nxout);
+
+    // negate all the y input, if ny == 1 then Nand the ny with the y input.
+    Not16(in=zeroy, out=noty);
+    Mux16(a=zeroy, b=noty, sel=ny, out=nyout);
+
+    // if f then output x + y otherwise x & y
+    
+    Add16(a=nxout, b=nyout, out= xplusy);
+    And16(a=nxout, b=nyout, out= xandy);
+    Mux16(a=xandy, b=xplusy, sel=f, out=fout);
+
+    // if no then output = !output
+    Not16(in=fout, out=nfout);
+    Mux16(a=fout, b=nfout, sel=no, out=out, out[0..7]=halfout, out[8..15]=restout, out[15]=ng);
+
+    // is zr use overflow
+    Or8Way(in=halfout, out=hout);
+    Or8Way(in=restout, out=rout);
+    Or(a=hout, b=rout, out=result);
+    Not(in=result, out=zr);
 }
