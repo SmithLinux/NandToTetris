@@ -14,6 +14,16 @@ CHIP RAM8 {
     IN in[16], load, address[3];
     OUT out[16];
 
+    // if load == 1 then load the in value into register which specified by address.
     PARTS:
-    // Put your code here:
+    DMux8Way(in=load ,sel=address ,a=slot1 ,b=slot2 ,c=slot3 ,d=slot4 ,e=slot5 ,f=slot6 ,g=slot7 ,h=slot8);
+    Mux8Way16(a=r1, b=r2, c=r3, d=r4, e=r5, f=r6, g=r7, h=r8, sel=address, out=out);
+    Register(in=in, load=slot1, out=r1);
+    Register(in=in, load=slot2, out=r2);
+    Register(in=in, load=slot3, out=r3);
+    Register(in=in, load=slot4, out=r4);
+    Register(in=in, load=slot5, out=r5);
+    Register(in=in, load=slot6, out=r6);
+    Register(in=in, load=slot7, out=r7);
+    Register(in=in, load=slot8, out=r8);
 }
