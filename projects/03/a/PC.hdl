@@ -16,5 +16,28 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+
+    //The logic that selects between the counter’s inc, load, and reset modes can be implemented using some of the multiplexers built in project 1.
+
+    // reset == 2 the next out is 0
+    Mux(a=true, b=false, sel=reset, out=ifreset);
+    Not(in=ifreset, out=resetsel); 
+    Mux16(a=in, b=false, sel=resetsel, out=firstout);
+
+    // load
+    Mux(a=ifreset, b=false, sel=load, out=ifload);
+    And(a=ifreset, b=load, out=lload);// if ifreset and load both equal true //next one is in
+
+    // increase == 1 the next out is in + 1
+    Mux(a=ifload, b=false, sel=inc, out=ifinc);
+    And(a=ifload, b=inc, out=isel); //if isel == 1 means need increase
+    Inc16(in=rout, out=incout);
+    Mux16(a=firstout, b=incout, sel=isel, out=thirdout);
+
+    Or(a=resetsel, b=lload, out=rl);
+    Or(a=rl, b=isel, out=tload);
+
+    // load=0 out(t+1)=out(t)
+    Register(in=thirdout, load=tload, out=rout,out=out);
+
 }
