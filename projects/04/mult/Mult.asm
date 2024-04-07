@@ -16,28 +16,36 @@
 // Output R2
 
 // while R0 > 0:
-// 	R2 = R1 + R1
+// 	R2 = R1 + R2
 //	R0--
 
-// set n = 0
-@n
+// set R2 = 0
+@R2
 M=0
 
 (LOOP)
-// if n == R0 goto END
-@n
-D=M
+
+// if R0 == 0 End the loop
 @R0
-D=D-M
+D=M
 @END
 D;JEQ
 
-// R2 += R1
+// R2 = R2 + R1
+@R1
+D=M
+@R2
+M=M+D
 
-// n = n + 1
-@n
-M=M+1
+// R0 = R0 - 1
+@R0
+D=M-1
+M=D
 
 // goto LOOP
 @LOOP
+0;JMP
+
+(END)
+@END
 0;JMP
