@@ -11,4 +11,75 @@
 // "white" in every pixel;
 // the screen should remain fully clear as long as no key is pressed.
 
-// Put your code here.
+// KBD > 0 set n = 8192
+
+(START)
+  @KBD
+  D=M
+  @key
+  M=D
+
+  @WHITE
+  D;JEQ
+  @BLACK
+  D;JGT
+
+  (WHITE)
+  @color
+  M=0 // color = 0
+  @NEXT
+  0;JMP
+
+  (BLACK)
+  @color
+  M=-1 // color = -1
+  @NEXT
+  0;JMP
+  
+  (NEXT)
+  @8191
+  D=A
+  @n
+  M=D // n = 8192
+
+  @i
+  M=0 // i = 0
+
+  @SCREEN
+  D=A
+  @address
+  M=D // address = 16384 (base address of the hack screen)
+
+(LOOP)
+   @i
+   D=M
+   @n
+   D=D-M
+   @END
+   D;JGT // if i > n goto END
+
+   @color
+   D=M
+   @address
+   A=M
+   M=D // RAM[address] = -1 (16 pixels)
+
+   @i
+   M=M+1 // i = i + 1
+   @1
+   D=A
+   @address
+   M=M+D // address = address + 1
+   @LOOP
+   0;JMP // goto LOOP
+
+(END)
+   @KBD
+   D=M
+   @key
+   D=M-D
+   @END
+   D;JEQ
+   @START
+   0;JMP
+
