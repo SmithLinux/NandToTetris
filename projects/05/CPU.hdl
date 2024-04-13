@@ -39,5 +39,62 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // ins[15] is 1 select aluout, ins[15] is 0 select A instruction
+    Mux16(a=ins, b=aluout, sel=instruction[15], out=acout);
+    // A register
+    ARegister(in=acout, load=arload, out=arout, out[0..14]=addressM);
+    // D register 
+    DRegister(in=aluout, load=drload, out=drout);
+    // writeM
+    Mux(a=false, b=true, sel=wmload, out=writeM);
+
+    // Ar or InM
+    And(a=instruction[12], b=instruction[15], out=arinMsel);
+    Mux16(a=arout, b=inM, sel=arinMsel, out=aMout);
+
+    // outzr, outng
+    DMux8Way(in=true ,sel=instruction[0..2] ,a=nullj ,b=jgt ,c=jeq ,d=jge ,e=jlt ,f=jne ,g=jle ,h=jmp );
+
+    // need fix
+    PC(in=arout, load=goto, inc=nojump, reset=reset, out[0..14]=pc);
+    // PC inc = true, 1. no jump 2. conditional goto if condition is false, else inc = false
+    // == 0
+    Mux(a=false, b=outzr, sel=jeq, out=eqz); // if jeq == 1 and outzr == 1, output 1
+    // <= 0
+    Or(a=outzr, b=outng, out=outle);
+    Mux(a=eqz, b=outle, sel=jle, out=lez); // if jle == 0 and outzr == 1 output 1
+    // >= 0
+    Not(in=outle, out=outp);
+    Or(a=outzr, b=outp, out=outge);
+    Mux(a=lez, b=outge, sel=jge, out=gez); // if jge == 1 and outzr == 1, output 1
+    // !=
+    Not(in=outzr, out=ifzr);
+    Mux(a=gez, b=ifzr, sel=jne, out=nez);
+    // < 0
+    Mux(a=nez, b=outng, sel=jlt, out=ltn); // if jlt == 1 and outng == 1, output 1
+    // >
+    Mux(a=ltn, b=outp, sel=jgt, out=gtp); // if jgt == 1 and isoutp == 1, output 1
+    // jump
+    Mux(a=gtp, b=true, sel=jmp, out=status); // if jgt == 1 and isoutp == 1, output 1
+    And(a=status, b=instruction[15], out=goto);
+    Not(in=goto, out=nojump);
+
+    ALU(x=drout ,y=aMout ,zx=zxi ,nx=nxi ,zy=zyi ,ny=nyi ,f=fi ,no=ni ,out=outM, out=aluout,zr=outzr ,ng=outng );
+
+    // decodes the instruction into 2 parts, one is A instruction another one is C instruction.
+    // A instruction, 0 + 15bit values, and stores the value in to A register. output the value.
+    Mux16(a=instruction, b=false, sel=instruction[15], out=ai);
+    // C instruction, 1 + alu control bits[6..11] + distination load bits[3..5] + jump bits[0..2].
+    Mux16(a=ai, b=instruction, sel=instruction[15], out=ins);
+    // if instruction[15] is 0 means A instruction, we do nothing
+    And(a=instruction[5], b=instruction[15], out=aorc);
+    Mux(a=true, b=aorc, sel=instruction[15], out=arload);
+    And(a=instruction[4], b=instruction[15], out=drload);
+    And(a=instruction[3], b=instruction[15], out=wmload);
+    And(a=instruction[11], b=instruction[15], out=zxi);
+    And(a=instruction[10], b=instruction[15], out=nxi);
+    And(a=instruction[9], b=instruction[15], out=zyi);
+    And(a=instruction[8], b=instruction[15], out=nyi);
+    And(a=instruction[7], b=instruction[15], out=fi);
+    And(a=instruction[6], b=instruction[15], out=ni);
 }
